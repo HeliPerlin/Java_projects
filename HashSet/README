@@ -1,0 +1,101 @@
+heli.1998
+
+
+=============================
+=      File description     =
+=============================
+SimpleHashSet.java - implements the SimpleHashSet class.
+LinkedListWrapper.java - implements a wrapper class for Java's LinkedList.
+OpenHashSet.java - implements the OpenHashSet class.
+StringWrapper.java - implements a wrapper class for Java's String.
+ClosedHashSet.java - implements the closedHashSet class.
+CollectionFacadeSet.java - implements a facade class for Java's collections.
+SimpleSetPerformanceAnalyzer.java - implements an analyzer for different data structures' run times.
+RESULTS - specifies the running times of different methods with arguments for some data structures.
+
+
+=============================
+=          Design           =
+=============================
+SimpleHashSet: The SimpleHashSet class implements the SimpleSet interface, which includes basic set - methods:
+add, delete, contains, size getter and capacity getters. Most methods are abstract, as they are implemented
+differently for open-hashing and for closed-hashing.
+
+LinkedListWrapper: A wrapper class for Java's linked list, implemented based on the delegation concept. It
+holds a linked list and implement the SimpleSet methods by calling the linked list same methods. created in
+order to allow holding an array of linked lists.
+
+OpenHashSet: The Open HashSet is based on chaining: its' data field is an array of LinkedListWrapper objects.
+an Element's index is determined only by the hash function and the value is chained to the returned index,
+which holds a LinkedListWrapper objects (basically works as a simple Java's LinkedList).
+
+StringWrapper: a wrapper class for Java's String. it Simply holds a string, received by the constructor. It
+allows access to it by a getter method. the uniqueness of this class is the isDeleted boolean field, that
+tells whether the current object was deleted from a data structure or not. The purpose is to allow deleting
+without having to define the object's index as null, since it might cause problems while searching for a
+value later.
+
+ClosedHashSet: implements a closed hashing set using an array of StringWrapper. an Elements index is defined
+by the first free cell found in the array according to a given function (if the returned index is not empty,
+the function uses a bigger parameter)
+
+CollectionFacadeSet: implements the SimpleSet interface. provides a simplified interface to Java's collection
+that implement the SimpleSet methods by simply delegating the methods of the given collection (given as an
+argument in the constructor). allows to create an array of objects that implement the SimpleSet methods and to
+execute them on each value in this array.
+
+SimpleSetPerformanceAnalyzer: tests different methods with different arguments on different data structures,
+some of them are Java's collection wrapped by the collectionFacadeSet and the rest are the HashSets
+implemented in this projects. Analyzes the runtime of each method on each data structures and allows simple
+comparison between them.
+
+=============================
+=  Implementation details   =
+=============================
+LinkedListWrapper: A wrapper class for Java's linked list, implemented based on the delegation concept.
+OpenHashSet: The Open HashSet is based on chaining: its' data field is an array of LinkedListWrapper objects.
+StringWrapper: A wrapper class for Java's String. it Simply holds a string, received by the constructor.
+ClosedHashSet: Implements a closed hashing set using an array of StringWrapper.
+Facade: Implement the SimpleSet methods by simply delegating the methods of the given collection (given as an
+argument in the constructor)
+PerformanceAnalyzer: The main method simply runs the adder and the containsRunner on the different arguments.
+
+=============================
+=    Answers to questions   =
+=============================
+The design of the OpenHashSet: I chose the option of writing the wrapper class for Java's Linked List as it is
+probably the most intuitive and understandable way. Since no any other methods (except for the linked list's)
+are needed for the implementation of OpenHashSet, it probably saves a lot of code and supports the reusable
+code principle by using the possibilities provided by Java's collections.
+
+Handling Deletions: As explained in the instructions, deleting an element from the ClosedHashSet by assigning
+it to null might bring to problems while searching for a value that is placed in a farther index and also
+passed by the deleted item's index. To avoid that, The data of the set is held in an array of StringWrapper
+objects that are simply constructed with a string and represent it, and in addition hold a boolean parameter,
+isDeleted, that is initialized with false and changed to true once an item was deleted. This way the add
+function that looks for a free space checks if the index holds a null element or an element with a false
+isDeleted member, which means the space is free. This way, no assigning to null is needed.
+
+Performance analysis:
+The OpenHashSet results of the first test ran with data1, are bad - since the combination of the values is
+kind of unlikely - all of the strings are mapped to the same index which creates a very long and loaded linked
+lists and causes a very long time for looking it up.
+A similar problem occurs with the ClosedHashSet. As all values are mapped to the same index, the more we
+advance in the data set, the more iterations are needed for the value to find an empty index. For that reason,
+a long time is taken for the method to run.
+
+Advantages, disadvantages, and purposes of usage for each set:
+HashSet: As seen in the results, the hashSet is the most effective data structure in average, most of the
+actions occur in a very short time and therefore it would probably be the best to use, especially for purposes
+of looking for items, as it has a quite big advantage on the others in the 6th test.
+LinkedList: Clearly, the linked list is the slowest in all of the test. The Only purpose I would use it for,
+is for popping or pushing elements to the head of it, but not more than that.
+ClosedHashSet: The closed hash set has quite bad results for adding data1 (as explained above) and for
+contains(- 13170890158). The reason for that is that it was probably located at the end of the list.
+OpenHashSet: The open hash set had better results then the closed hash set in the test of data2, where the
+data is much more balanced and likely, and worse results for data1, that holds values that are all mapped to
+the same index, So a smart choice between the two would depend on the hash codes of the given values- if they
+are balanced over their amount, it's better to use open hashing.
+TreeSet: the treeSet was kind of average and performed about the same for all of the operations. Therefore It
+is better to use it for a program that does basically all of the actions in more or less the same frequency.
+
