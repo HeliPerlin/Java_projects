@@ -1,0 +1,151 @@
+heli.1998
+
+
+=============================
+=      File description     =
+=============================
+
+filesprocessing package:
+DirectoryProcessor.java
+Parser.java
+Section.java
+TypeIException.java
+TypeIIException.java
+
+filter package:
+Filter.java
+FilterFactory.java
+All.java
+Between.java
+Contains.java
+Executable.java
+File.java
+GreaterThan.java
+Hidden.java
+Prefix.java
+SmallerThan.java
+Suffix.java
+Writable.java
+
+order package:
+Order.java
+OrderComparator.java
+OrderFactory.java
+AbsComparator.java
+SizeComparator.java
+TypeComparator.java
+
+
+=============================
+=          Design           =
+=============================
+The program is divided into three packages: filesprocessing, order, filter. This kind of division helps
+maintain the modularity principle and make the code readable. Each package is in charge of its own- the filter
+package implements the different features of the filters and so is the order package. The filesprocessing
+packages is the main package that runs all together and combines the features of the other packages, it also
+contains the DirectoryProcessor that is the main file with a main function. Let's discuss each module
+separately:
+
+filter:
+the filter package contains of a Filter class that is the driver class for all of the other filter classes. It
+implements the FileFilter interface, which has the method "accept" (more on that later).It also has a
+constructor that receives the negation indicator, and is called as 'super' from each extending class'
+constructor.  Each extending filter class includes a constructor that simply passes it the relevant arguments,
+and a public abstract method "accept", which belongs to the FileFilter interface. It tells whether a file
+(passed as an argument) is passing the current filter or not. This later helps using the ListFiles method
+od the File Java's class, that receives a filter that implements the FileFilter interface and is applied on a
+directory, returning the files from this directory that pass the filter.
+Another class which is found in the filter package is the FilterFactory- this class has a single public
+method, as well as some private helper methods, that receives a filter description line from a section in the
+commands line and sends it to the relevant constructor according to the first value, if the format of the line
+is valid. If not, it throws a type I exception. The constructors themselves also might throw type I
+exceptions, more on that later.
+
+order:
+The order package consists of thr OrderComparator class, that is the driver class of absComparator,
+typeComparator, and sizeComparator - all implementing the Comparator interface by implementing the compare
+method, that receives two files and compares them according to different parameters that are reflected in
+their names.
+This package also contains an Order class, who's constructor receives a sorting parameter (e.g what to sort
+by) and a reverse indicator, according to the relevant line in the commands file, and constructs a new order
+object that sorts a given files array according to the given parameter. More accurately, the sorting parameter
+is used for telling the constructor which kind of comparator to initialize as the objects' order comparator.
+the Order class also has a sortFiles method that calls the quickSort method, which is of course implementing
+the quick sort algorithm. This method also has a helper method, partition, as a part of the implementation of
+the sorting algorithm. This method of course compares each two files according to the instance's comparator
+that was initialized.
+Finally, the order package also includes the OrderFactory which receives an order description line and
+extracts the relevant parameter and the reverse indicator, if one exists. The Factory might throw a Type I
+exception in case of an invalid format of the line, and the constructors might also throw exceptions if the
+name of the sorting parameter is illegal.
+
+filesprocessing:
+This package contains the DirectoryProcessor, which is the main class in the program. It consists of a main
+method which receives as arguments two inputs - the commands file, from which to extract the filters and the
+orders from, and the source directory that is to be filtered and ordered. This method first initializes a
+parser object that will be explained later, and uses is to parse the commands file as a first step to check
+that there are no TypeII exceptions (e.g mainly illegal file format). During the parsing the sections of
+FILTER and ORDER are saved into a data structure and afterwards are ran over to initialize the matching object
+and be applied on the source directory.
+The Parser is using a Scanner object to run over the commands file. In each iteration a section it checks
+that there are no TypeII exceptions, and if there are- it throws an exception. The sections are saved during
+the initial parsing but the filters and objects are not generated at this stage, in order to maintain the rule
+of first looking for TypeII exceptions and exiting the program if they are met, and only then apply each
+FILTER and ORDER section on the source directory.
+The Section class is the data structure that each section is saved to during the parsing. The filter and order
+description lines are saved into the object using setters, and then using the generating methods are creating
+a Filter and Order objects by calling their factories.
+TypeIException and TypeIIException are extending the RunTimeException class and are thrown in the relevant
+cases as described in the instructions. More on the exception-handling in the program in the next paragraph.
+
+
+
+=============================
+=  Implementation details   =
+=============================
+The filesprocessing packages is the main package that runs all together and combines the features of the other
+packages. It contains the DirectoryProcessor that is the main file with a main function. In this method a
+ListFiles method is called with a File argument that is created out of the given input source. This way it
+uses it implementation of the accept method in each of the filter objects, as it is sent to the ListFiles
+method and generates an array of passing and ordered files.
+The Section class is the data structure that each section is saved to during the parsing. The filter and order
+description lines are saved into the object using setters, and then using the generating methods are creating
+a Filter and Order objects by calling their factories.
+The Parser is going over the file using a Scanner object that receives a FileReader object. It has a while
+loop that goes over a single section in each iteration and saves it as a section. Each section is then added
+to the section ArrayList that is a static member of the class, that holds all of the section objects of the
+current class. After handling a single commands file is finished, the sections ArrayList is reset using the
+clean method, so that the fact it is a static member won't make it keep redundant information.
+Order class- its constructor receives a sorting parameter (e.g what to sort by) and a reverse indicator,
+according to the relevant line in the commands file, and constructs a new order object that sorts a given
+files array according to the given parameter. The Order class also has a sortFiles method that calls the
+quickSort method, which is of course implementing the quick sort algorithm. This method also has a helper
+method, partition, as a part of the implementation of the sorting algorithm. This method of course compares
+each two files according to the instance's comparator that was initialized.
+
+
+
+=============================
+=    Answers to questions   =
+=============================
+
+Error handling:
+The different methods in the program might throw two types of exceptions as described in the instructions.
+Type II Exceptions:
+This kind of exceptions are caught and handled in the main method of the directory processor- the logic behind
+this is that the program needs to finish its running in case of a type II exception occurs, so it can stop
+anything it does and go to the highest level of the program. Type II exceptions are only thrown by the parser
+during the execution of the parse method. It is thrown in case that the actual lines in the commands file
+don't match the expected lines (e.g illegal commands file format) and as there is no catch block in the parser
+they are caught and handled in the method they were called from - the main. The handling includes printing an
+error message to System.err and returning. Type I exceptions are only thrown from the next level on, that is,
+after going over the entire file and checking there are no Type II errors. Type I errors might be thrown from
+both factories in case the structure of the description line is illegal or in case the name of the filter/
+order is illegal. They might also be thrown in the constructors of the filter/ order themselves in case they
+are given invalid arguments. Type I errors are handled by printing an error and continuing forward, as the
+line is replaced with the default option, 'abs' or 'all' for order or filter, respectively.
+
+File-Sorting:
+The sorting algorithm that is used in this program for sorting files is the QuickSort, whose run time is
+O(n*log(n)), which in the Data Structures course was proved to be the minimum time for sorting an array, so it
+is definitely efficient.
